@@ -16,7 +16,7 @@ async def search_books(query: str):
     The query will match against book_id, book_name, and author
     """
     try:
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
         
@@ -67,7 +67,7 @@ async def get_reader_borrowings(student_id: str):
     try:
         print("ID")
         print(student_id)
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
         
@@ -130,7 +130,7 @@ async def get_reader_activity_calendar(student_id: str):
     Returns dates and activity counts for the calendar visualization
     """
     try:
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
 
@@ -173,7 +173,7 @@ async def borrow_book(student_id: str, book_id: int):
     Borrow a book: update book availability and create a borrow record
     """
     try:
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
 
@@ -330,7 +330,7 @@ async def return_book(student_id: str, book_id: int):
     Return a book: update book availability and update a borrow record
     """
     try:
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
 
@@ -399,7 +399,7 @@ async def renew_book(student_id: str, book_id: int):
     try:
         from datetime import datetime, timedelta
 
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
 

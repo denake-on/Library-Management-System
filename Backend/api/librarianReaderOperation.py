@@ -26,7 +26,7 @@ async def search_readers(query: str):
     search readers
     """
     try:
-        # Connect to SQLite database
+
         conn = sqlite3.connect('library.db')
         cursor = conn.cursor()
         

@@ -1,5 +1,7 @@
 # Library Management System / 图书馆管理系统
 
+![Library Management System Screenshot](./Vue-Frontend/src/assets/ForReadme.png)
+
 [English](#library-management-system) | [中文](#图书馆管理系统)
 
 ## Library Management System
@@ -114,6 +116,7 @@ The traditional frontend is located in the `Frontend` directory and requires no 
 - Reader login: `Frontend/Reader/login.html`
 - Librarian interface: `Frontend/Librarian/librarian-home.html`
 - Director interface: `Frontend/Library-Director/director-home.html`
+- only for display function, no relationship with the final frontend effect!
 
 ##### Vue.js Frontend
 1. Navigate to the Vue-Frontend directory:
@@ -144,6 +147,7 @@ The system provides two different frontend implementations:
 - Separate sections for Readers, Librarians, and Library Directors
 - Uses p5.js for animated background effects
 - Pure JavaScript implementation with HTML/CSS
+- only for display function, no relationship with the final frontend effect!
 
 **Vue.js Frontend:**
 - Built with Vue 3 framework
@@ -173,6 +177,7 @@ The system provides two different frontend implementations:
 **Traditional Frontend:**
 - **Animation**: p5.js (1.7.0)
 - **Languages**: HTML, CSS, JavaScript
+- only served as the displayment of the initial effect, no relationship with the final frontend effect.
 
 **Vue.js Frontend:**
 - **Framework**: Vue.js (3.4.21)
@@ -298,7 +303,7 @@ The system provides two different frontend implementations:
 - `library.db` - 系统的主要 SQLite 数据库文件
 - `README.md` - 项目文档文件
 - `Backend/` - 包含所有后端相关文件
-- `Frontend/` - 包含传统的 HTML/CSS/JavaScript 前端文件
+- `Frontend/` - 包含HTML/CSS/JavaScript 前端文件 （仅作为原型图效果展示）
 - `Vue-Frontend/` - 包含 Vue.js 3 前端文件
 
 #### 后端目录结构
@@ -396,11 +401,12 @@ The system provides two different frontend implementations:
 
 #### 前端安装
 
-##### 传统 HTML 前端
-传统前端位于 `Frontend` 目录中，无需特殊安装。您可以直接在浏览器中打开 HTML 文件：
+##### HTML 前端
+前端位于 `Frontend` 目录中，无需特殊安装。您可以直接在浏览器中打开 HTML 文件：
 - 读者登录：`Frontend/Reader/login.html`
 - 图书管理员界面：`Frontend/Librarian/librarian-home.html`
 - 馆长界面：`Frontend/Library-Director/director-home.html`
+- 此文件夹的html文件为原型图效果转化，与最终前端分离且完全无关。
 
 ##### Vue.js 前端
 1. 进入 Vue-Frontend 目录：
@@ -423,14 +429,14 @@ The system provides two different frontend implementations:
 ### 架构设计
 
 #### 前端架构
-系统提供两种不同的前端实现：
-1. **传统的 HTML/CSS/JavaScript 前端** 位于 `Frontend` 目录
-2. **现代化的 Vue.js 3 前端** 位于 `Vue-Frontend` 目录
+1. **HTML/CSS/JavaScript 前端** 位于 `Frontend` 目录 （此文件夹的html文件为原型图效果转化，与最终前端分离且完全无关。）
+2. **现代化的 Vue.js 3 前端** 位于 `Vue-Frontend` 目录 （最终的前端实现效果）
 
-**传统前端：**
+**HTML前端：**
 - 为读者、图书管理员和图书馆馆长提供独立的界面
 - 使用 p5.js 实现动画背景效果
 - 纯 JavaScript 实现，使用 HTML/CSS
+- 仅用作原型图展示的基础功能，和最终前端效果无关。
 
 **Vue.js 前端：**
 - 基于 Vue 3 框架构建
@@ -457,9 +463,10 @@ The system provides two different frontend implementations:
 - **多部分数据**: python-multipart (0.0.6)
 
 #### 前端
-**传统前端：**
+**HTML前端：**
 - **动画**: p5.js (1.7.0)
 - **语言**: HTML, CSS, JavaScript
+- 注： 此文件夹的html文件为原型图效果转化，与最终前端分离且完全无关。
 
 **Vue.js 前端：**
 - **框架**: Vue.js (3.4.21)
