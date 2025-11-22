@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Library Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: rgba(24, 144, 255, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(24, 144, 255, 1);
+        }
+
+        .search-bar {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(60, 60, 60, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .loan-policy {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .book-list {
+            flex: 0 0 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .book-card {
+            background: url('../images/button-bg.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            color: #000;
+            position: relative;
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            z-index: 0;
+        }
+
+        .book-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .book-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .book-card.active {
+            border: 2px solid #1890ff;
+        }
+
+        .book-cover-small {
+            width: 80px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .book-info-small {
+            flex: 1;
+        }
+
+        .book-title-small {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .book-desc-small {
+            font-size: 12px;
+            color: #000;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .view-details-btn {
+            background: rgba(40, 40, 40, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+
+        .book-detail-panel {
+            flex: 1;
+            background: rgba(40, 40, 40, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            display: none;
+        }
+
+        .book-detail-panel.active {
+            display: block;
+        }
+
+        .book-cover-large {
+            width: 150px;
+            height: 220px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: white;
+            line-height: 1.6;
+        }
+
+        .borrow-btn {
+            background: rgba(82, 196, 26, 0.8);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .borrow-btn:hover {
+            background: rgba(82, 196, 26, 1);
+        }
+
+        .borrow-btn:disabled {
+            background: rgba(100, 100, 100, 0.5);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+
+    <div class="content">
+        <button class="back-btn" onclick="window.location.href='reader-home.html'">&lt; BACK</button>
+
+        <div class="search-bar">
+            <input type="text" class="search-input" id="search-input" placeholder="searching for books....:" 
+                   value="" onkeypress="handleSearchKeyPress(event)">
+        </div>
+
+        <div class="loan-policy">
+            Each loan may not exceed 20 days. Renewing adds an additional 10 days, and each book can be renewed only once.
+        </div>
+
+        <div class="main-container">
+            <div class="book-list" id="book-list">
+                <!-- 图书列表将通过JavaScript动态生成 -->
+            </div>
+
+            <div class="book-detail-panel" id="book-detail-panel">
+                <!-- 图书详情将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从URL获取搜索关键词
+        function getSearchQuery() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('q') || '';
+        }
+
+        // 模拟图书数据
+        const mockBooks = [
+            {
+                id: 1,
+                title: '(La pesanteur et la grâce)',
+                titleCN: '重负与神恩',
+                author: '(法)魏尔(Weil, Simone), 1909-1943. 顾嘉琛,(语言学),1941- 杜小真,1946-',
+                description: '本书中文简体翻译版由华夏出版社出版。西蒙娜·薇依,20世纪法国哲学家,社会活动家,神秘主义思想大师,杜小真(1946-),福建霞浦人,早年为中学法语教师、顾嘉琛(1941-),江苏苏州人1964年毕业于北京大学西语系。',
+                isbn: '9787508095868',
+                publisher: '北京:华夏出版社',
+                year: '2019',
+                location: 'University Library, Available, General Collection (4th Floor); B2430.W473.P47 G85 2019',
+                available: true
+            },
+            {
+                id: 2,
+                title: 'Sapiens',
+                titleCN: '人类简史',
+                author: 'Yuval Noah Harari',
+                description: 'A brief history of humankind from the Stone Age to the present.',
+                isbn: '9780062316097',
+                publisher: 'Harper',
+                year: '2015',
+                location: 'University Library, Available, General Collection (3rd Floor)',
+                available: true
+            }
+        ];
+
+        // 渲染图书列表
+        function renderBookList(books) {
+            const bookList = document.getElementById('book-list');
+            bookList.innerHTML = '';
+
+            books.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.onclick = () => showBookDetail(book, card);
+
+                card.innerHTML = `
+                    <img src="../images/cover.png" class="book-cover-small" alt="Book Cover">
+                    <div class="book-info-small">
+                        <div class="book-title-small">${book.title}</div>
+                        <div class="book-desc-small">${book.description}</div>
+                        <button class="view-details-btn" onclick="event.stopPropagation(); showBookDetail(${JSON.stringify(book).replace(/"/g, '&quot;')}, this.closest('.book-card'))">view details</button>
+                    </div>
+                `;
+
+                bookList.appendChild(card);
+            });
+        }
+
+        // 显示图书详情
+        function showBookDetail(book, cardElement) {
+            const panel = document.getElementById('book-detail-panel');
+            panel.classList.add('active');
+
+            panel.innerHTML = `
+                <img src="../images/cover.png" class="book-cover-large" alt="Book Cover">
+                <div class="detail-section">
+                    <div class="detail-label">Title</div>
+                    <div class="detail-value">${book.titleCN || book.title}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Author</div>
+                    <div class="detail-value">${book.author}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">ISBN</div>
+                    <div class="detail-value">${book.isbn}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Publisher</div>
+                    <div class="detail-value">${book.publisher}, ${book.year}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value">${book.description}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Location</div>
+                    <div class="detail-value">${book.location}</div>
+                </div>
+                <button class="borrow-btn" ${!book.available ? 'disabled' : ''} onclick="borrowBook(${book.id})">
+                    ${book.available ? 'borrow' : 'Not Available'}
+                </button>
+            `;
+
+            // 高亮选中的卡片
+            document.querySelectorAll('.book-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            if (cardElement) {
+                cardElement.classList.add('active');
+            }
+        }
+
+        // 借阅图书
+        function borrowBook(bookId) {
+            // 发送借阅请求到后端
+            // fetch('/api/books/borrow', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ bookId: bookId })
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     if (data.success) {
+            //         alert('Borrow successful!');
+            //     }
+            // });
+
+            // 模拟借阅成功
+            alert('Borrow successful!');
+        }
+
+        // 搜索功能
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('search-input').value.trim();
+                if (query) {
+                    window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                }
+            }
+        }
+
+        // 执行搜索
+        function performSearch(query) {
+            // 实际应从后端API获取
+            // fetch(`/api/books/search?q=${encodeURIComponent(query)}`)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         renderBookList(data.books);
+            //     });
+
+            // 模拟搜索结果
+            const filteredBooks = mockBooks.filter(book => 
+                book.title.toLowerCase().includes(query.toLowerCase()) ||
+                book.description.toLowerCase().includes(query.toLowerCase())
+            );
+            renderBookList(filteredBooks.length > 0 ? filteredBooks : mockBooks);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const query = getSearchQuery();
+            document.getElementById('search-input').value = query;
+            if (query) {
+                performSearch(query);
+            } else {
+                renderBookList(mockBooks);
+            }
+        });
+    </script>
+</body>
+</html>
+

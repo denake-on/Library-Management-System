@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Books - Library Director</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 40px;
+            padding: 40px 60px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sidebar img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(40, 40, 40, 0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav a {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .nav a.active {
+            background: rgba(255, 255, 255, 0.35);
+            color: #111;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+
+        .search-row button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        .books-wrapper {
+            display: flex;
+            gap: 25px;
+        }
+
+        .book-list {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .book-card {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .book-cover {
+            width: 90px;
+            height: 130px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: url('../images/cover.png') center/cover no-repeat;
+        }
+
+        .book-info {
+            flex: 1;
+        }
+
+        .book-info h3 {
+            margin-bottom: 8px;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .book-actions button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            cursor: pointer;
+        }
+
+        .add-panel {
+            flex: 1;
+            padding: 20px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .add-panel h3 {
+            margin-bottom: 16px;
+        }
+
+        .add-panel .form-group {
+            margin-bottom: 12px;
+        }
+
+        .add-panel label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            letter-spacing: 0.3px;
+        }
+
+        .add-panel input,
+        .add-panel select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.35);
+            color: white;
+        }
+
+        .add-panel button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+    <div class="content">
+        <aside class="sidebar">
+            <img src="../images/avatar.jpg" alt="avatar">
+            <h3>Hi, Luoyin ^^</h3>
+            <button onclick="window.location.href='director-report.html'">view library report</button>
+            <button onclick="window.location.href='director-profile.html'">edit my information</button>
+        </aside>
+
+        <section class="main">
+            <div class="nav">
+                <a href="director-manage-books.html" class="active">Manage Books</a>
+                <a href="director-manage-readers.html">Manage Readers</a>
+            </div>
+
+            <div class="search-row">
+                <input type="text" placeholder="searching for books....">
+                <button onclick="document.getElementById('add-book-title').focus()">add new books</button>
+            </div>
+
+            <div class="books-wrapper">
+                <div class="book-list">
+                    <div class="book-card">
+                        <div class="book-cover"></div>
+                        <div class="book-info">
+                            <h3>《La pesanteur et la grâce》</h3>
+                            <p>Author: Simone Weil | Publisher: 华夏出版社 | Status: Available</p>
+                            <div class="book-actions">
+                                <button onclick="window.location.href='director-book-detail.html'">view details</button>
+                                <button>quick edit</button>
+                                <button>delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="book-card">
+                        <div class="book-cover"></div>
+                        <div class="book-info">
+                            <h3>《Atomic Habits》</h3>
+                            <p>Author: James Clear | Publisher: Avery | Status: Borrowed</p>
+                            <div class="book-actions">
+                                <button onclick="window.location.href='director-book-detail.html'">view details</button>
+                                <button>quick edit</button>
+                                <button>delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-panel">
+                    <h3>Add new book</h3>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="add-book-title" placeholder="Book title">
+                    </div>
+                    <div class="form-group">
+                        <label>Author</label>
+                        <input type="text" placeholder="Author name">
+                    </div>
+                    <div class="form-group">
+                        <label>Publisher</label>
+                        <input type="text" placeholder="Publisher">
+                    </div>
+                    <div class="form-group">
+                        <label>Creation Date</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="Shelf / Floor">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select>
+                            <option value="available">Available</option>
+                            <option value="borrowed">Borrowed</option>
+                        </select>
+                    </div>
+                    <button>submit to backend</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+

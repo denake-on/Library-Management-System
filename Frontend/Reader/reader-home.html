@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reader Home - Library Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        /* 左半边 - 读者信息 */
+        .left-panel {
+            flex: 0 0 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 用户头像和问候 */
+        .user-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 0;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .avatar-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        /* 日历视图 */
+        .calendar-card {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            color: #333;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .calendar-legend {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-square {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .legend-less {
+            background: #d3d3d3;
+        }
+
+        .legend-mid {
+            background: #808080;
+        }
+
+        .legend-more {
+            background: #2f2f2f;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 3px;
+            margin-bottom: 10px;
+        }
+
+        .month-column {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .month-label {
+            font-size: 11px;
+            color: #000000;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .day-squares {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+
+        .day-square {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px;
+            background: #d3d3d3;
+        }
+
+        .day-square.mid {
+            background: #808080;
+        }
+
+        .day-square.more {
+            background: #2f2f2f;
+        }
+
+        /* 读书报告 */
+        .reading-report {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .report-text {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: rgba(40, 40, 40, 0.3);
+            background-image: url('../images/button-bg.png');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            text-align: left;
+            flex: 1;
+        }
+
+        .action-btn:hover {
+            opacity: 0.7;
+        }
+
+        /* 右半边 - 搜索区域 */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-section {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(60, 60, 60, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- p5.js 画布容器 -->
+    <div id="p5-canvas"></div>
+
+    <!-- 主要内容 -->
+    <div class="content">
+        <!-- 左半边 -->
+        <div class="left-panel">
+            <!-- 用户头像和问候 -->
+            <div class="user-section">
+                <div class="avatar-container">
+                    <img id="user-avatar" class="avatar" src="../images/avatar.jpg" alt="Avatar" style="display: none;" onerror="this.style.display='none'; document.getElementById('avatar-placeholder').style.display='flex';" onload="this.style.display='block'; document.getElementById('avatar-placeholder').style.display='none';">
+                    <div id="avatar-placeholder" class="avatar-placeholder">👤</div>
+                </div>
+                <div class="greeting">Hi, <span id="user-name">Luoyin</span> ^^</div>
+            </div>
+
+            <!-- 日历视图 -->
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <div class="calendar-title">Reading Activity</div>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-square legend-less"></div>
+                            <span>less</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-square legend-mid"></div>
+                            <span>mid</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-square legend-more"></div>
+                            <span>more</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- 日历将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <!-- 读书报告 -->
+            <div class="reading-report">
+                <div class="report-text" id="report-text">
+                    Loading reading insights...
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <button class="action-btn" onclick="window.location.href='my-borrowings.html'">Manage My Borrowings</button>
+                <button class="action-btn" onclick="window.location.href='profile-edit.html'">edit my information</button>
+            </div>
+        </div>
+
+        <!-- 右半边 -->
+        <div class="right-panel">
+            <div class="search-section">
+                <input type="text" class="search-input" id="search-input" placeholder="searching for books...." 
+                       onkeypress="handleSearchKeyPress(event)">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成日历视图
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+            
+            // 模拟数据 - 实际应从后端获取
+            const activityData = generateMockActivityData();
+            
+            months.forEach((month, monthIndex) => {
+                const monthColumn = document.createElement('div');
+                monthColumn.className = 'month-column';
+                
+                const monthLabel = document.createElement('div');
+                monthLabel.className = 'month-label';
+                monthLabel.textContent = month;
+                monthColumn.appendChild(monthLabel);
+                
+                const daySquares = document.createElement('div');
+                daySquares.className = 'day-squares';
+                
+                // 每个月的天数（简化处理，实际需要根据具体月份计算）
+                const daysInMonth = [31, 28, 31, 30, 31];
+                const days = daysInMonth[monthIndex];
+                
+                for (let day = 1; day <= days; day++) {
+                    const square = document.createElement('div');
+                    square.className = 'day-square';
+                    
+                    const dateKey = `${monthIndex + 1}-${day}`;
+                    const activity = activityData[dateKey] || 0;
+                    
+                    if (activity >= 4) {
+                        square.classList.add('more');
+                    } else if (activity >= 2) {
+                        square.classList.add('mid');
+                    }
+                    // 默认是 less (浅灰色)
+                    
+                    daySquares.appendChild(square);
+                }
+                
+                monthColumn.appendChild(daySquares);
+                calendarGrid.appendChild(monthColumn);
+            });
+        }
+
+        // 生成模拟活动数据
+        function generateMockActivityData() {
+            const data = {};
+            // 随机生成一些活动数据
+            for (let month = 1; month <= 5; month++) {
+                for (let day = 1; day <= 31; day++) {
+                    const activity = Math.floor(Math.random() * 6); // 0-5次
+                    if (activity > 0) {
+                        data[`${month}-${day}`] = activity;
+                    }
+                }
+            }
+            return data;
+        }
+
+        // 加载用户信息
+        function loadUserInfo() {
+            // 实际应从后端API获取
+            // fetch('/api/user/info')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         document.getElementById('user-name').textContent = data.name;
+            //         if (data.avatar) {
+            //             document.getElementById('user-avatar').src = data.avatar;
+            //             document.getElementById('user-avatar').style.display = 'block';
+            //             document.getElementById('avatar-placeholder').style.display = 'none';
+            //         }
+            //     });
+        }
+
+        // 加载读书报告
+        function loadReadingReport() {
+            // 实际应从后端API获取
+            // fetch('/api/reading/report')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         document.getElementById('report-text').innerHTML = data.report;
+            //     });
+            
+            // 模拟数据
+            document.getElementById('report-text').innerHTML = 
+                'On April 1st, you checked out three books at once — Sapiens, The Pragmatic Programmer, and Thinking, Fast and Slow. Maybe they sparked a few new ideas.<br><br>' +
+                'Over the past three months, the book you spent the most time with was Atomic Habits — clearly a favorite in your recent reading history.';
+        }
+
+        // 搜索功能
+        function handleSearchKeyPress(event) {
+            if (event.key === 'Enter') {
+                const query = document.getElementById('search-input').value.trim();
+                if (query) {
+                    window.location.href = `search-results.html?q=${encodeURIComponent(query)}`;
+                }
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+            loadUserInfo();
+            loadReadingReport();
+        });
+    </script>
+</body>
+</html>
+

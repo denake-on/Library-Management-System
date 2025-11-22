@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Director Home - Library Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas { position: fixed; inset: 0; z-index: 0; }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 40px;
+            padding: 40px 60px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sidebar img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(40, 40, 40, 0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            cursor: pointer;
+        }
+
+        .nav button.active {
+            background: rgba(255, 255, 255, 0.35);
+            color: #111;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+
+        .search-row button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        .books-wrapper,
+        .readers-wrapper {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .book-list,
+        .reader-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 60vh;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .book-card, .reader-card {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .book-cover, .reader-avatar {
+            width: 90px;
+            height: 130px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: url('../images/cover.png') center/cover no-repeat;
+        }
+
+        .reader-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: url('../images/student.png') center/cover no-repeat;
+        }
+
+        .book-info, .reader-info {
+            flex: 1;
+        }
+
+        .book-info h3, .reader-info h3 {
+            margin-bottom: 8px;
+        }
+
+        .book-info p, .reader-info p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .book-actions, .reader-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .book-actions button, .reader-actions button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .view-details-btn { background: rgba(255, 255, 255, 0.2); }
+        .edit-btn { background: rgba(255, 165, 0, 0.7); }
+        .delete-btn { background: rgba(255, 77, 79, 0.7); }
+
+        .add-panel {
+            width: 360px;
+            padding: 26px 24px;
+            border-radius: 18px;
+            background: rgba(10, 10, 10, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            position: sticky;
+            top: 40px;
+        }
+
+        .add-panel h3 {
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.45);
+            color: white;
+        }
+
+        .add-panel button {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+        }
+
+        /* Style for the management areas */
+        .books-area, .readers-area, .librarians-area {
+            display: none;
+            flex: 1;
+        }
+
+        .books-area.active, .readers-area.active, .librarians-area.active {
+            display: flex;
+        }
+
+        .librarian-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .librarian-card h4 {
+            margin-bottom: 6px;
+        }
+
+        .librarian-card p {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .librarian-card button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 77, 79, 0.7);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+
+    <div class="content">
+        <aside class="sidebar">
+            <img src="../images/avatar.jpg" alt="director avatar">
+            <h2>Hi, Luoyin ^^</h2>
+            <button onclick="window.location.href='director-report.html'">view library report</button>
+            <button onclick="window.location.href='director-profile.html'">edit my information</button>
+        </aside>
+
+        <section class="main">
+            <div class="nav">
+                <button class="nav-btn active" onclick="showSection('books')">Manage Books</button>
+                <button class="nav-btn" onclick="showSection('readers')">Manage Readers</button>
+                <button class="nav-btn" onclick="showSection('librarians')">Manage Librarians</button>
+            </div>
+
+            <div class="search-row">
+                <input type="text" id="search-input" placeholder="search...">
+                <button id="search-btn">search</button>
+            </div>
+
+            <!-- Books Management Area -->
+            <div id="books-area" class="books-area active">
+                <div class="books-wrapper">
+                    <div class="book-list">
+                        <div class="book-card">
+                            <div class="book-cover"></div>
+                            <div class="book-info">
+                                <h3>Sapiens</h3>
+                                <p><strong>Author:</strong> Yuval Noah Harari</p>
+                                <p><strong>ISBN:</strong> 9780062316097</p>
+                                <p><strong>Status:</strong> Available</p>
+                                <p><strong>Location:</strong> University Library, General Collection</p>
+                            </div>
+                            <div class="book-actions">
+                                <button class="view-details-btn">view details</button>
+                                <button class="edit-btn">edit info</button>
+                                <button class="delete-btn">delete</button>
+                            </div>
+                        </div>
+                        <div class="book-card">
+                            <div class="book-cover"></div>
+                            <div class="book-info">
+                                <h3>Atomic Habits</h3>
+                                <p><strong>Author:</strong> James Clear</p>
+                                <p><strong>ISBN:</strong> 9780735211292</p>
+                                <p><strong>Status:</strong> Checked Out</p>
+                                <p><strong>Location:</strong> University Library, General Collection</p>
+                            </div>
+                            <div class="book-actions">
+                                <button class="view-details-btn">view details</button>
+                                <button class="edit-btn">edit info</button>
+                                <button class="delete-btn">delete</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="add-panel">
+                        <h3>Add Book</h3>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" placeholder="Book title">
+                        </div>
+                        <div class="form-group">
+                            <label>Author</label>
+                            <input type="text" placeholder="Author name">
+                        </div>
+                        <div class="form-group">
+                            <label>ISBN</label>
+                            <input type="text" placeholder="ISBN number">
+                        </div>
+                        <div class="form-group">
+                            <label>Genre</label>
+                            <input type="text" placeholder="Genre">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <input type="text" placeholder="Available/Checked Out">
+                        </div>
+                        <button>Add Book</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Readers Management Area -->
+            <div id="readers-area" class="readers-area">
+                <div class="readers-wrapper">
+                    <div class="reader-list">
+                        <div class="reader-card">
+                            <div class="reader-avatar"></div>
+                            <div class="reader-info">
+                                <h3>John Doe</h3>
+                                <p><strong>Reader ID:</strong> R001</p>
+                                <p><strong>Email:</strong> john@example.com</p>
+                                <p><strong>Phone:</strong> 123-456-7890</p>
+                                <p><strong>Status:</strong> Active</p>
+                            </div>
+                            <div class="reader-actions">
+                                <button class="view-details-btn">view details</button>
+                                <button class="edit-btn">edit info</button>
+                                <button class="delete-btn">delete</button>
+                            </div>
+                        </div>
+                        <div class="reader-card">
+                            <div class="reader-avatar"></div>
+                            <div class="reader-info">
+                                <h3>Jane Smith</h3>
+                                <p><strong>Reader ID:</strong> R002</p>
+                                <p><strong>Email:</strong> jane@example.com</p>
+                                <p><strong>Phone:</strong> 098-765-4321</p>
+                                <p><strong>Status:</strong> Active</p>
+                            </div>
+                            <div class="reader-actions">
+                                <button class="view-details-btn">view details</button>
+                                <button class="edit-btn">edit info</button>
+                                <button class="delete-btn">delete</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="add-panel">
+                        <h3>Add Reader</h3>
+                        <div class="form-group">
+                            <label>Reader ID</label>
+                            <input type="text" placeholder="ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" placeholder="Full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="Email address">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" placeholder="Phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <input type="text" placeholder="Active/Inactive">
+                        </div>
+                        <button>Add Reader</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Librarians Management Area -->
+            <div id="librarians-area" class="librarians-area">
+                <div class="readers-wrapper">
+                    <div class="reader-list">
+                        <div class="librarian-card">
+                            <div>
+                                <h4>Librarian ID: 123090404</h4>
+                                <p>Department: University Library · Email: 123090404@link.cuhk.edu.cn · Phone: 13312880143</p>
+                            </div>
+                            <button class="delete-btn">delete</button>
+                        </div>
+                        <div class="librarian-card">
+                            <div>
+                                <h4>Librarian ID: 12392093</h4>
+                                <p>Department: SDS · Email: admin02@link.cuhk.edu.cn · Phone: 13812345678</p>
+                            </div>
+                            <button class="delete-btn">delete</button>
+                        </div>
+                    </div>
+
+                    <div class="add-panel">
+                        <h3>Add Librarian</h3>
+                        <div class="form-group">
+                            <label>Librarian ID</label>
+                            <input type="text" placeholder="ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" placeholder="Department">
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" placeholder="Full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="Email address">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" placeholder="Phone number">
+                        </div>
+                        <button>Add Librarian</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function showSection(sectionName) {
+            // Hide all areas
+            document.getElementById('books-area').classList.remove('active');
+            document.getElementById('readers-area').classList.remove('active');
+            document.getElementById('librarians-area').classList.remove('active');
+
+            // Show selected area
+            document.getElementById(sectionName + '-area').classList.add('active');
+
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update search placeholder based on current section
+            const searchInput = document.getElementById('search-input');
+            if(sectionName === 'books') {
+                searchInput.placeholder = 'search for books...';
+            } else if(sectionName === 'readers') {
+                searchInput.placeholder = 'search for readers...';
+            } else if(sectionName === 'librarians') {
+                searchInput.placeholder = 'search for librarians...';
+            }
+        }
+
+        // Search functionality
+        document.getElementById('search-btn').addEventListener('click', function() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const activeArea = document.querySelector('.main > div[class*="-area"].active');
+
+            if(activeArea.id === 'books-area') {
+                // Search in books
+                const bookCards = activeArea.querySelectorAll('.book-card');
+                bookCards.forEach(card => {
+                    const bookText = card.textContent.toLowerCase();
+                    if(bookText.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            } else if(activeArea.id === 'readers-area') {
+                // Search in readers
+                const readerCards = activeArea.querySelectorAll('.reader-card, .librarian-card');
+                readerCards.forEach(card => {
+                    const readerText = card.textContent.toLowerCase();
+                    if(readerText.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            } else if(activeArea.id === 'librarians-area') {
+                // Search in librarians
+                const librarianCards = activeArea.querySelectorAll('.librarian-card');
+                librarianCards.forEach(card => {
+                    const librarianText = card.textContent.toLowerCase();
+                    if(librarianText.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

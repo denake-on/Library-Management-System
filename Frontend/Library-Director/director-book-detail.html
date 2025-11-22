@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Detail - Library Director</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 35px;
+            padding: 40px 60px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sidebar img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(40, 40, 40, 0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        .detail-panel {
+            flex: 1;
+            padding: 30px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .book-info {
+            display: flex;
+            gap: 30px;
+        }
+
+        .book-info img {
+            width: 180px;
+            height: 260px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: url('../images/cover.png') center/cover no-repeat;
+        }
+
+        .info-text p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .actions button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .actions .primary {
+            background: rgba(255, 255, 255, 0.8);
+            color: #111;
+        }
+
+        .actions .danger {
+            background: rgba(255, 77, 79, 0.8);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+    <div class="content">
+        <aside class="sidebar">
+            <img src="../images/avatar.jpg" alt="avatar">
+            <h3>Hi, Luoyin ^^</h3>
+            <button onclick="window.location.href='director-report.html'">view library report</button>
+            <button onclick="window.location.href='director-profile.html'">edit my information</button>
+        </aside>
+
+        <section class="detail-panel">
+            <button class="back-btn" onclick="window.location.href='director-manage-books.html'">&lt; BACK</button>
+            <div class="book-info">
+                <img alt="book cover">
+                <div class="info-text">
+                    <p><strong>Title:</strong> 重负与神恩</p>
+                    <p><strong>Author:</strong> (法) 魏尔 (Weil, Simone), 1909-1943</p>
+                    <p><strong>Publisher:</strong> 北京 · 华夏出版社</p>
+                    <p><strong>Creation Date:</strong> 2019</p>
+                    <p><strong>Location:</strong> University Library · General Collection (4th Floor) · B2430.W473.P47 G85 2019</p>
+                    <p><strong>Status:</strong> Available · (1 copy, 0 requests)</p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="primary">edit book</button>
+                <button class="danger">delete</button>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+

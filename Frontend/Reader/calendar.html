@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>按月份网格（6 行 x 5~6 列）贡献日历 — 黑白灰</title>
+  <style>
+    :root{
+      --bg: #0b0d0f;
+      --panel: #0f1315;
+      --muted: #9aa0a4;
+      --cell-border: rgba(255,255,255,0.06);
+      --cell-white: #ffffff;  /* 初始化为白色 */
+      --cell-empty: rgba(255,255,255,0.02); /* 空格背景（略微不同以示区分） */
+      --tooltip-bg: rgba(255,255,255,0.06);
+      --tooltip-text: #e8eaec;
+      --gap-month: 24px; /* 月份之间固定间隔 */
+      --cell-size: 20px;
+      --cell-gap: 8px;
+    }
+
+    html,body{height:100%;margin:0;background:var(--bg);color: #cbd5d8;font-family: system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;}
+    .container{max-width:1200px;margin:28px auto;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border-radius:10px;border:1px solid rgba(255,255,255,0.03);}
+    h1{margin:0 0 12px 0;color:#e6e9eb;font-weight:600;font-size:18px}
+
+    .controls { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; }
+    .controls .left { color:var(--muted); font-size:13px; }
+
+    /* months container */
+    .gh-calendar{background:var(--panel);padding:14px;border-radius:8px;position:relative;border:1px solid rgba(255,255,255,0.03)}
+    .months-row{
+      display:flex;
+      align-items:flex-start;
+      gap: var(--gap-month);
+      overflow-x:auto;
+      padding-bottom:6px;
+      padding-top:6px;
+      scroll-behavior: smooth;
+    }
+
+    .month-col{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-width: 120px;
+    }
+    .month-label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:10px;
+      height:18px;
+      text-align:center;
+      min-width: 120px;
+    }
+
+    /* days grid: 6 rows, dynamic columns */
+    .days-grid{
+      display:grid;
+      grid-auto-rows: var(--cell-size);
+      row-gap: var(--cell-gap);
+      column-gap: var(--cell-gap);
+      justify-content:center;
+      align-items:start;
+      padding:6px;
+      background: transparent;
+      border-radius:8px;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border-radius:6px;
+      background: var(--cell-white);
+      border: 1px solid var(--cell-border);
+      box-sizing: border-box;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      color: rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: transform .06s ease;
+    }
+    .cell:active { transform: scale(.98); }
+    .cell.empty {
+      background: var(--cell-empty);
+      border-style: dashed;
+      cursor: default;
+    }
+
+    /* tooltip */
+    .tooltip{position:fixed;padding:8px 10px;border-radius:6px;background:var(--tooltip-bg);color:var(--tooltip-text);font-size:13px;border:1px solid rgba(255,255,255,0.04);pointer-events:none;white-space:nowrap;transform:translate(-50%,-120%);box-shadow:0 8px 20px rgba(2,6,12,0.6)}
+
+    @media (max-width:900px){
+      :root { --cell-size:16px; --cell-gap:6px; --gap-month:16px; }
+      .month-col { min-width: 100px; }
+      .month-label{ min-width:100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>每月网格：6 行 × 5~6 列（按天数）— 黑白灰</h1>
+
+    <div id="app">
+      <div class="gh-calendar">
+        <div class="controls">
+          <div class="left">显示最近：
+            <select v-model.number="monthsToShow" @change="rebuild" style="background:transparent;color:#e6eef8;border:1px solid rgba(255,255,255,0.04);padding:4px 8px;border-radius:6px;margin-left:8px;">
+              <option v-for="n in [3,4,5,6,12]" :key="n" :value="n">{{ n }} 个月</option>
+            </select>
+          </div>
+          <div class="right" style="color:var(--muted);font-size:13px">每月按实际天数分布，固定 6 行</div>
+        </div>
+
+        <div class="months-row" ref="monthsRow">
+          <div v-for="m in months" :key="m.key" class="month-col">
+            <div class="month-label">{{ m.label }}</div>
+
+            <!-- days grid: set grid-template-columns dynamically -->
+            <div
+              class="days-grid"
+              :style="{
+                gridTemplateColumns: `repeat(${m.cols}, var(--cell-size))`,
+                width: `${m.cols * (cellSize + cellGap) + 24}px`
+              }"
+            >
+              <!-- fill 6 rows x cols cells in row-major order -->
+              <div
+                v-for="r in (m.rows * m.cols)"
+                :key="m.key + '-c-' + r"
+                class="cell"
+                :class="{ empty: r > m.days.length }"
+                @mouseenter="onHoverCell(m, r)"
+                @mouseleave="hideTooltip"
+                @click="onCellClick(m, r)"
+              >
+                <!-- optional: show day number for debug, currently hidden for clean look
+                <span v-if="r <= m.days.length">{{ m.days[r-1].day }}</span>
+                -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- tooltip -->
+        <div v-if="tooltip.show" class="tooltip" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+          {{ tooltip.text }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3.4.0/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, ref, reactive, onMounted } = Vue;
+
+    createApp({
+      setup(){
+        const cellSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-size')) || 20;
+        const cellGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-gap')) || 8;
+
+        const monthsToShow = ref(5); // default
+        const tooltip = reactive({ show:false, text:'', x:0, y:0 });
+
+        // helper: days in month
+        function daysInMonth(year, monthIndex){ // monthIndex: 0..11
+          return new Date(year, monthIndex + 1, 0).getDate();
+        }
+
+        // Build months data: for last N months
+        function computeMonths(n){
+          const now = new Date();
+          const arr = [];
+          for (let i = n - 1; i >= 0; i--){
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const y = d.getFullYear();
+            const m = d.getMonth(); // 0..11
+            const label = d.toLocaleString('en', { month: 'short' }) + ' ' + y;
+            const dayCount = daysInMonth(y, m);
+            // rows fixed to 6
+            const rows = 6;
+            // columns = ceil(days/rows) => typically 5 or 6
+            const cols = Math.ceil(dayCount / rows);
+            const days = [];
+            for (let day = 1; day <= dayCount; day++){
+              const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+              days.push({ date: dateStr, day });
+            }
+            arr.push({ key: `${y}-${m}`, year: y, month: m, label, days, rows, cols });
+          }
+          return arr;
+        }
+
+        const months = ref(computeMonths(monthsToShow.value));
+
+        function rebuild(){
+          months.value = computeMonths(monthsToShow.value);
+          // optional: scroll to start (left)
+          requestAnimationFrame(() => {
+            const wrap = document.querySelector('.months-row');
+            if (wrap) wrap.scrollLeft = 0;
+          });
+        }
+
+        // tooltip handlers: map cell index to day if exists
+        function onHoverCell(month, cellIndex){
+          // cellIndex is 1-based index in grid (r from 1..rows*cols)
+          const idx = cellIndex - 1;
+          // row-major mapping: dayIndex = idx (since days array is in sequence)
+          if (idx < month.days.length){
+            const dayObj = month.days[idx];
+            tooltip.show = true;
+            tooltip.text = `${month.label} · Day ${dayObj.day} · ${dayObj.date}`;
+            // position near mouse: use current mouse position if available
+            // fallback: center of month column
+            // We'll attach a mousemove listener temporarily to update coords
+            // For simplicity, use event from addEventListener on document (lastMouse)
+            const x = lastMouse.x || window.innerWidth / 2;
+            const y = (lastMouse.y || window.innerHeight / 2) - 12;
+            tooltip.x = x;
+            tooltip.y = y;
+          } else {
+            tooltip.show = false;
+          }
+        }
+
+        function hideTooltip(){
+          tooltip.show = false;
+        }
+
+        function onCellClick(month, cellIndex){
+          const idx = cellIndex - 1;
+          if (idx < month.days.length){
+            const dayObj = month.days[idx];
+            console.log('Clicked', dayObj.date);
+            // you can further handle click (emit, open modal, etc.)
+          }
+        }
+
+        // track last mouse coords for tooltip positioning
+        const lastMouse = { x: null, y: null };
+        function onMouseMove(e){
+          lastMouse.x = e.clientX;
+          lastMouse.y = e.clientY;
+          if (tooltip.show){
+            tooltip.x = e.clientX;
+            tooltip.y = e.clientY - 12;
+          }
+        }
+        window.addEventListener('mousemove', onMouseMove);
+
+        onMounted(()=>{
+          // initial rebuild
+          rebuild();
+        });
+
+        return {
+          months,
+          monthsToShow,
+          rebuild,
+          cellSize,
+          cellGap,
+          tooltip,
+          onHoverCell,
+          hideTooltip,
+          onCellClick
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

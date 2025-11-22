@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Readers - Librarian</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas { position: fixed; inset: 0; z-index: 0; }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 40px;
+            padding: 40px 60px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sidebar img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(40, 40, 40, 0.5);
+            color: white;
+            cursor: pointer;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav a {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .nav a.active {
+            background: rgba(255, 255, 255, 0.35);
+            color: #111;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+
+        .search-row button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        .readers-wrapper {
+            display: flex;
+            gap: 24px;
+        }
+
+        .reader-list {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .reader-card {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .reader-card img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #fff;
+        }
+
+        .reader-info {
+            flex: 1;
+        }
+
+        .reader-card button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            cursor: pointer;
+        }
+
+        .add-panel {
+            flex: 1;
+            padding: 20px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .add-panel h3 { margin-bottom: 14px; }
+
+        .form-group { margin-bottom: 10px; }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .add-panel input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.35);
+            color: white;
+        }
+
+        .add-panel button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+    <div class="content">
+        <aside class="sidebar">
+            <img src="../images/avatar.jpg" alt="avatar">
+            <h3>Hi, Luoyin ^^</h3>
+            <button onclick="window.location.href='librarian-report.html'">view library report</button>
+            <button onclick="window.location.href='librarian-profile.html'">edit my information</button>
+        </aside>
+
+        <section class="main">
+            <div class="nav">
+                <a href="manage-books.html">Manage Books</a>
+                <a href="manage-readers.html" class="active">Manage Readers</a>
+            </div>
+
+            <div class="search-row">
+                <input type="text" placeholder="searching for readers....">
+                <button onclick="document.getElementById('add-reader-name').focus()">add new readers</button>
+            </div>
+
+            <div class="readers-wrapper">
+                <div class="reader-list">
+                    <div class="reader-card">
+                        <img src="../images/student.png" alt="reader avatar">
+                        <div class="reader-info">
+                            <h4>123090404</h4>
+                            <p>Luoyin | Computer Science and Engineering</p>
+                        </div>
+                        <button onclick="window.location.href='librarian-reader-detail.html'">view details</button>
+                    </div>
+                </div>
+
+                <div class="add-panel">
+                    <h3>Add reader</h3>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input id="add-reader-name" type="text" placeholder="Reader name">
+                    </div>
+                    <div class="form-group">
+                        <label>Student ID</label>
+                        <input type="text" placeholder="ID number">
+                    </div>
+                    <div class="form-group">
+                        <label>Major</label>
+                        <input type="text" placeholder="Major">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" placeholder="Phone">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" placeholder="Temporary password">
+                    </div>
+                    <button>submit to backend</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
+

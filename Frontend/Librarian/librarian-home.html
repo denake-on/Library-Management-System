@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Home - Library Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <script src="../background-animation.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            color: white;
+        }
+
+        #p5-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            gap: 40px;
+            padding: 40px 60px;
+        }
+
+        .sidebar {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .sidebar img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar h2 {
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(40, 40, 40, 0.5);
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar button:hover {
+            opacity: 0.7;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav a {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav a.active {
+            background: rgba(255, 255, 255, 0.35);
+            color: #111;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-row input {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+        }
+
+        .search-row button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+        }
+
+        .book-card {
+            margin-top: 10px;
+            padding: 20px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .book-card .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .book-card button {
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="p5-canvas"></div>
+
+    <div class="content">
+        <aside class="sidebar">
+            <img src="../images/avatar.jpg" alt="Avatar">
+            <h2>Hi, Luoyin ^^</h2>
+            <button onclick="window.location.href='librarian-report.html'">view library report</button>
+            <button onclick="window.location.href='librarian-profile.html'">edit my information</button>
+        </aside>
+
+        <section class="main">
+            <div class="nav">
+                <a href="manage-books.html" class="active">Manage Books</a>
+                <a href="manage-readers.html">Manage Readers</a>
+            </div>
+
+            <div class="search-row">
+                <input type="text" placeholder="searching for books....">
+                <button onclick="window.location.href='manage-books.html'">add new books</button>
+            </div>
+
+            <div class="book-card">
+                <div class="header">
+                    <h3>《La pesanteur et la grâce》</h3>
+                    <button onclick="window.location.href='librarian-book-detail.html'">view details</button>
+                </div>
+                <p>本书中文简体翻译版由华夏出版社出版。西蒙娜·薇依,20世纪法国哲学家,社会活动家,神秘主义思想大师...</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
